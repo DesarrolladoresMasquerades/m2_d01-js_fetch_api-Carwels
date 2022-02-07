@@ -19,23 +19,53 @@ fetch("https://pokeapi.co/api/v2/pokemon")
 //   });
 // }
 
-function buildPokedex(pokeDex) {
-  pokeDex.results.forEach((pokemon) => {
-    const newH1 = document.createElement("h1");
-    newH1.innerText = pokemon.name;
+// function buildPokedex(pokeDex) {
+//   pokeDex.results.forEach((pokemon) => {
+//     const newH1 = document.createElement("h1");
+//     newH1.innerText = pokemon.name;
 
+//     const newLink = document.createElement("a");
+//     newLink.innerText = "Link to Pokémon";
+//     newLink.href = pokemon.url;
+
+//     const newImg = document.createElement("img");
+//     fetch(pokemon.url)
+//       .then((response) => response.json())
+//       .then((onePokemon) => {
+//         newImg.src = onePokemon.sprites.front_shiny;
+//         document.body.appendChild(newH1);
+//         document.body.appendChild(newImg);
+//         document.body.appendChild(newLink);
+//       });
+//   });
+// }
+
+function buildPokedex(pokeDex) {
+  const pokeNames = pokeDex.results.map((pokemon) => pokemon.name);
+  const pokelinks = pokeDex.results.map((pokemon) => pokemon.url);
+  const fetchImagPromises = pokelinks.map((link) =>
+    fetch(link).then((response) => response.json())
+  );
+
+  Promise.all(fetchImagPromises).then((arrayOfPokemon) => {
+    addToDom(pokeNames, pokelinks, arrayOfPokemon);
+  });
+}
+
+function addToDom(names, links, pokemon) {
+  for (let i = 0; i < pokemon.length; i++) {
+    const newH1 = document.createElement("h1");
+    newH1.innerText = names[i];
+    
     const newLink = document.createElement("a");
     newLink.innerText = "Link to Pokémon";
-    newLink.href = pokemon.url;
+    newLink.href = links[i];
 
     const newImg = document.createElement("img");
-    fetch(pokemon.url)
-      .then((response) => response.json())
-      .then((onePokemon) => {
-        newImg.src = onePokemon.sprites.front_shiny;
-        document.body.appendChild(newH1);
-        document.body.appendChild(newImg);
-        document.body.appendChild(newLink);
-      });
-  });
+    newImg.src = pokemon[i].sprites.front_shiny;
+
+    document.body.appendChild(newH1);
+    document.body.appendChild(newImg);
+    document.body.appendChild(newLink);
+  }
 }
